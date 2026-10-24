@@ -1,0 +1,12 @@
+{
+  "name": "sora-otp-vercel",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sora OTP: HTML/CSS/JS frontend with Vercel serverless API, Midtrans Snap and NokosPusat integration.",
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.1",
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.9.6"
+  }
+}
