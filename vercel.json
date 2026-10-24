@@ -2,16 +2,114 @@
   "version": 2,
   "outputDirectory": "public",
   "functions": {
-    "api/**/*.js": { "maxDuration": 15 }
+    "api/**/*.js": {
+      "maxDuration": 15
+    }
   },
+  "redirects": [
+    {
+      "source": "/login.html",
+      "destination": "/auth/login",
+      "permanent": true
+    },
+    {
+      "source": "/register.html",
+      "destination": "/auth/register",
+      "permanent": true
+    },
+    {
+      "source": "/dashboard.html",
+      "destination": "/app",
+      "permanent": true
+    },
+    {
+      "source": "/order.html",
+      "destination": "/orders",
+      "permanent": true
+    },
+    {
+      "source": "/topup.html",
+      "destination": "/wallet",
+      "permanent": true
+    },
+    {
+      "source": "/profile.html",
+      "destination": "/account",
+      "permanent": true
+    },
+    {
+      "source": "/auth-callback.html",
+      "destination": "/auth/callback",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/config",
+      "destination": "/api/config.js"
+    },
+    {
+      "source": "/auth/login",
+      "destination": "/login.html"
+    },
+    {
+      "source": "/auth/register",
+      "destination": "/register.html"
+    },
+    {
+      "source": "/app",
+      "destination": "/dashboard.html"
+    },
+    {
+      "source": "/orders",
+      "destination": "/order.html"
+    },
+    {
+      "source": "/wallet",
+      "destination": "/topup.html"
+    },
+    {
+      "source": "/account",
+      "destination": "/profile.html"
+    },
+    {
+      "source": "/auth/callback",
+      "destination": "/auth-callback.html"
+    }
+  ],
   "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    },
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
       ]
     }
   ]

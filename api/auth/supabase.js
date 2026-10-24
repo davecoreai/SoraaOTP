@@ -12,7 +12,7 @@ module.exports = async (req, res) => {
     if (!verify.ok) return fail(res, 401, 'Sesi Supabase tidak valid. Coba login Google lagi.');
     const identity = await verify.json();
     const email = String(identity.email || '').trim().toLowerCase();
-    if (!identity.id || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail(res, 400, 'Akun Google tidak memiliki email yang valid.');
+    if (!identity.id || !email || !identity.email_confirmed_at || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail(res, 400, 'Email akun belum terverifikasi atau tidak valid. Verifikasi email di Supabase lalu coba lagi.');
     const meta = identity.user_metadata || {};
     const name = String(meta.full_name || meta.name || email.split('@')[0]).trim().slice(0, 80) || 'Pengguna';
     let result = await query('SELECT id,name,email FROM users WHERE email=$1 LIMIT 1', [email]);

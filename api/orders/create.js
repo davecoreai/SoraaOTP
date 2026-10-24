@@ -16,10 +16,17 @@ module.exports = async (req, res) => {
     const countryCode = String(body.country_code || "indonesia");
     const countryName = String(body.country_name || "Indonesia").slice(0,100);
     const providerId = body.provider_id ? String(body.provider_id) : null;
-    const price = Number(body.quoted_price);
+    const requestedPrice = Number(body.quoted_price);
     if (!serviceId || !serviceName) return fail(res, 400, "Layanan tidak valid.");
     if (!["provider_1","provider_2","provider_3"].includes(provider)) return fail(res, 400, "Provider tidak valid.");
-    if (!Number.isSafeInteger(price) || price < 1) return fail(res, 400, "Harga penawaran tidak valid.");
+    if (!Number.isSafeInteger(requestedPrice) || requestedPrice < 1 || !providerId) return fail(res, 400, "Penawaran tidak valid. Muat ulang katalog dan pilih server lagi.");
+    // Re-fetch the authoritative offer server-side. Never trust a price sent by the browser.
+    const livePayload = await nokos(`/api/v1/services/${encodeURIComponent(serviceId)}/offers?provider=${provider}&country_code=${encodeURIComponent(countryCode)}`);
+    const liveOffers = Array.isArray(livePayload) ? livePayload : [];
+    const liveOffer = liveOffers.find(item => String(item.provider_id || "") === providerId && Number(item.price) === requestedPrice);
+    if (!liveOffer) return fail(res, 409, "Harga atau stok berubah. Muat ulang katalog lalu coba lagi.");
+    const price = Number(liveOffer.price);
+    if (!Number.isSafeInteger(price) || price < 1) return fail(res, 409, "Harga penawaran tidak valid dari provider.");
     const markup = Math.max(0, Number(process.env.PRICE_MARKUP_IDR || 0));
     const finalPrice = price + Math.round(markup);
     const localId = crypto.randomUUID();

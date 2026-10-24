@@ -15,7 +15,7 @@ async function init(){
   $("#offer").addEventListener("change",updatePrice);
   await loadCountries();
   await loadOrders();
- }catch(e){Swal.fire({icon:"error",title:"Tidak dapat memuat katalog",text:e.message,background:"#151515",color:"#fff"});if(e.message.includes("login"))location.href="/login.html"}
+ }catch(e){Swal.fire({icon:"error",title:"Tidak dapat memuat katalog",text:e.message,background:"#151515",color:"#fff"});if(e.message.includes("login"))location.href="/auth/login"}
 }
 async function loadCountries(){
  const service=$("#service").value;
@@ -55,7 +55,7 @@ $("#orderForm").addEventListener("submit",async e=>{
   await Swal.fire({icon:"success",title:"Order dibuat",html:`<p>Nomor: <b>${escapeHTML(d.order.number||"Sedang disiapkan")}</b></p><p>Status: ${escapeHTML(d.order.status||"pending")}</p>`,background:"#151515",color:"#fff"});
   await loadOrders();
  }catch(err){
-  if(err.message.toLowerCase().includes("saldo tidak cukup")) await Swal.fire({icon:"warning",title:"Saldo Tidak Cukup",text:"Saldo kamu tidak cukup untuk membeli nomor ini. Topup minimal Rp10.000 terlebih dahulu.",showCancelButton:true,confirmButtonText:"Topup sekarang",cancelButtonText:"Nanti",background:"#151515",color:"#fff"}).then(r=>{if(r.isConfirmed)location.href="/topup.html"});
+  if(err.message.toLowerCase().includes("saldo tidak cukup")) await Swal.fire({icon:"warning",title:"Saldo Tidak Cukup",text:"Saldo kamu tidak cukup untuk membeli nomor ini. Topup minimal Rp10.000 terlebih dahulu.",showCancelButton:true,confirmButtonText:"Topup sekarang",cancelButtonText:"Nanti",background:"#151515",color:"#fff"}).then(r=>{if(r.isConfirmed)location.href="/wallet"});
   else await Swal.fire({icon:"error",title:"Order gagal",text:err.message,background:"#151515",color:"#fff"});
  }finally{btn.disabled=false;btn.innerHTML='Pembayaran / Beli nomor <span>→</span>'}
 });

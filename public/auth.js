@@ -5,12 +5,14 @@ const showAuthMessage = (text) => {
   el.classList.add('show');
 };
 let supabaseClient = null;
+let supabaseConfig = null;
 async function getSupabase() {
   if (supabaseClient) return supabaseClient;
   const response = await fetch('/api/config', { cache: 'no-store' });
   const config = await response.json();
   if (!response.ok || !config.supabaseUrl || !config.supabaseAnonKey) throw new Error('Supabase belum dikonfigurasi. Tambahkan SUPABASE_URL dan SUPABASE_ANON_KEY di Vercel.');
   if (!window.supabase?.createClient) throw new Error('Library Supabase gagal dimuat. Muat ulang halaman.');
+  supabaseConfig = config;
   supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
   return supabaseClient;
 }
@@ -29,7 +31,7 @@ document.querySelector('#loginForm')?.addEventListener('submit', async (event) =
     if (error) throw error;
     if (!data.session?.access_token) throw new Error('Sesi login tidak tersedia. Periksa pengaturan konfirmasi email di Supabase.');
     await createAppSession(data.session.access_token);
-    location.href = '/dashboard.html';
+    location.href = '/app';
   } catch (error) { showAuthMessage(error.message || 'Login gagal.'); } finally { button.disabled = false; }
 });
 document.querySelector('#registerForm')?.addEventListener('submit', async (event) => {
@@ -41,11 +43,11 @@ document.querySelector('#registerForm')?.addEventListener('submit', async (event
     const client = await getSupabase();
     const email = document.querySelector('#email').value.trim();
     const name = document.querySelector('#name').value.trim();
-    const { data, error } = await client.auth.signUp({ email, password, options:{ data:{ full_name:name }, emailRedirectTo:`${location.origin}/login.html` } });
+    const { data, error } = await client.auth.signUp({ email, password, options:{ data:{ full_name:name }, emailRedirectTo:`${supabaseConfig?.baseUrl || location.origin}/auth/login` } });
     if (error) throw error;
     if (data.session?.access_token) {
       await createAppSession(data.session.access_token);
-      location.href = '/dashboard.html';
+      location.href = '/app';
     } else {
       showAuthMessage('Akun berhasil dibuat. Periksa email untuk verifikasi, lalu login kembali.');
     }
@@ -55,7 +57,7 @@ document.querySelector('#googleButton')?.addEventListener('click', async () => {
   const button = document.querySelector('#googleButton'); button.disabled = true;
   try {
     const client = await getSupabase();
-    const { error } = await client.auth.signInWithOAuth({ provider:'google', options:{ redirectTo:`${location.origin}/auth-callback.html`, queryParams:{ access_type:'offline', prompt:'select_account' } } });
+    const { error } = await client.auth.signInWithOAuth({ provider:'google', options:{ redirectTo:`${supabaseConfig?.baseUrl || location.origin}/auth/callback`, queryParams:{ access_type:'offline', prompt:'select_account' } } });
     if (error) throw error;
   } catch (error) { showAuthMessage(error.message || 'Login Google gagal.'); button.disabled = false; }
 });

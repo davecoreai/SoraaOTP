@@ -29,11 +29,11 @@ Frontend HTML/CSS/JS and Vercel serverless API for a virtual-number/OTP dashboar
    - `MIDTRANS_SERVER_KEY`
    - `MIDTRANS_CLIENT_KEY`
    - `MIDTRANS_IS_PRODUCTION=false` while testing
-   - `APP_URL=https://your-project.vercel.app`
+   - `BASE_URL=https://soraotp.vercel.app` (canonical app URL; do not add a trailing slash)
    - optionally `PRICE_MARKUP_IDR=0`
 5. Redeploy after adding environment variables.
 6. In Midtrans Dashboard, set Payment Notification URL to:
-   `https://your-project.vercel.app/api/midtrans/notification`
+   `https://soraotp.vercel.app/api/midtrans/notification`
 7. Test with Midtrans Sandbox first, then switch keys and `MIDTRANS_IS_PRODUCTION=true` for production.
 
 ## Google OAuth with Supabase
@@ -42,7 +42,7 @@ Frontend HTML/CSS/JS and Vercel serverless API for a virtual-number/OTP dashboar
 3. In Google Cloud → Authorized JavaScript origins, add `https://soraotp.vercel.app` (or your actual deployed origin).
 4. In Supabase Authentication → URL Configuration, set Site URL to `https://soraotp.vercel.app` and add `https://soraotp.vercel.app/**` to Redirect URLs.
 5. Set `SUPABASE_URL` and `SUPABASE_ANON_KEY` in Vercel, then redeploy. The browser only receives the public anon/publishable key.
-6. The callback at `/auth-callback.html` exchanges the verified Supabase access token for the app session cookie. The project still needs the Neon database configured for wallets/orders/topups. Email/password accounts must be created through the registration page so Supabase is the source of authentication.
+6. The callback at `/auth/callback` exchanges the verified Supabase access token for the app session cookie. The project still needs the Neon database configured for wallets/orders/topups. Email/password accounts must be created through the registration page so Supabase is the source of authentication.
 
 ## Local development
 Requires Node.js 20+ and Vercel CLI:
@@ -68,10 +68,16 @@ Create `.env.local` using `.env.example` values. Localhost cookie security may r
 ## Important notes before real-money production
 - This project requires valid NokosPusat and Midtrans credentials; keys are not included.
 - Google login requires Supabase Google provider credentials and `SUPABASE_URL` / `SUPABASE_ANON_KEY` environment variables.
-- Use HTTPS and set `APP_URL` to the deployed origin.
+- Use HTTPS and set `BASE_URL=https://soraotp.vercel.app` for canonical OAuth and payment callbacks.
 - Set `MIDTRANS_IS_PRODUCTION=false` and use sandbox keys until end-to-end tests pass.
 - NokosPusat upstream API balance must also be funded independently from customers' Sora OTP wallet balance.
 - The order API deducts the displayed quoted price plus `PRICE_MARKUP_IDR` from the user's wallet; the upstream order is submitted at the exact NokosPusat quoted price.
 - For a robust production rollout, add rate limiting, email verification, password reset, admin operations/refund review, monitoring, and automated integration tests.
 - If NokosPusat returns an allocation-uncertain error, inspect the upstream workspace before retrying a purchase.
-# SoraaOTP
+
+
+## Clean URL paths
+The public-facing pages use extensionless URLs: `/auth/login`, `/auth/register`, `/app`, `/orders`, `/wallet`, `/account`, and `/auth/callback`. Legacy `.html` paths redirect to these URLs. This cleans up browser URLs but does not hide source code from the repository or browser developer tools.
+
+## Vercel API routing note
+The `/api/config` route has an explicit rewrite to `/api/config.js`. If it still returns `404 NOT_FOUND`, verify Vercel Root Directory is the repository root and the deployment contains the `api/` directory; a ZIP change cannot fix a Vercel project configured to deploy a different root or branch.
