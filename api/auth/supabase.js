@@ -25,7 +25,11 @@ module.exports = async (req, res) => {
     setCookie(res, await createSession(user));
     return send(res, 200, { ok: true, user: { id:user.id, name:user.name, email:user.email } });
   } catch (e) {
-    console.error('supabase auth exchange error', e.message);
-    return fail(res, 500, 'Gagal menghubungkan login Supabase. Periksa database dan konfigurasi.');
-  }
+  console.error('supabase auth exchange error', {
+    message: e.message,
+    code: e.code,
+    detail: e.detail
+  });
+  return fail(res, 500, 'DEBUG: ' + (e.message || 'Unknown error'));
+ }
 };
